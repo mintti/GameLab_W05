@@ -3,12 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager I;
-
     public GameObject Player { get; set; }
+
+    private bool _isPause; 
+    public bool IsPause {
+        get => _isPause;
+        set
+        {
+            _isPause = value;
+            Time.timeScale = _isPause ? 1 : 0;
+        }
+    }
     private void Awake()
     {
         if (I == null)
@@ -19,6 +29,14 @@ public class GameManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            IsPause = !IsPause;
         }
     }
     

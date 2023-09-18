@@ -16,9 +16,29 @@ public class EnemyController : MonoBehaviour
     }
     
     public bool IsActive { get; set; }
-    public State CurrentState { get; set; }
+
+    public State _curState;
+
+    public State CurrentState
+    {
+        get => _curState;
+        set
+        {
+            if (_curState != value)
+            {
+                traceMark.SetActive(value == State.Trace);
+            }
+            _curState = value;
+        }
+    }
+
+    public LayerMask targetMask;  // 감지 대상 레이어 마스크
+    public LayerMask obstacleMask;// 장애물 레이어 마스크
+    
+    public GameObject traceMark;
 
     private NavMeshAgent _myNavAgent;
+    
     private void Start()
     {
         _myNavAgent = GetComponent<NavMeshAgent>();
@@ -34,21 +54,19 @@ public class EnemyController : MonoBehaviour
     {
         while (IsActive)
         {
+            CheckPlayerInSight();
             switch (CurrentState)
             {
                 case State.Idle : 
                 case State.Move : 
-                    _myNavAgent.SetDestination(RandomNavmeshLocation(4f));
+                    _myNavAgent.SetDestination(RandomNavmeshLocation(10f));
                     break;
-                case State.Trace : break;
+                case State.Trace :
+                    _myNavAgent.SetDestination(PlayerTr.position);
+                    break;
             }
             yield return null;
         }       
-    }
-
-    private void Update()
-    {
-        CheckPlayerInSight();
     }
 
     Vector2 RandomNavmeshLocation(float radius) {
@@ -64,17 +82,19 @@ public class EnemyController : MonoBehaviour
 
     private void CheckPlayerInSight()
     {
-        Vector2 dir = GameManager.I.Player.transform.position - transform.position;
+        Vector2 dir = PlayerTr.position - transform.position;
         Vector2 trans = transform.position;
         
-        var hit = Physics2D.Raycast(trans, dir.normalized, dir.magnitude);
+        var hit = Physics2D.Raycast(trans, dir.normalized, dir.magnitude, targetMask);
+
+
+        //var firstHit = hit.FirstOrDefault(x => !x.collider.CompareTag("Bullet"));
         if (hit.collider != null)
         {
-            if (hit.collider.gameObject.CompareTag("Player"))
-            {
-                Debug.Log("SEE");
-                // CurrentState = State.Trace;
-            }
+            bool isCatchPlayer = hit.collider.gameObject.CompareTag("Player");
+            CurrentState = isCatchPlayer ? State.Trace : State.Move;
         }
     }
+
+    private Transform PlayerTr => GameManager.I.Player.transform;
 }

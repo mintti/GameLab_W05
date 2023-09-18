@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - ENV
+  - Enemy
+  - Wall
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -14,8 +17,8 @@ TagManager:
   - UI
   - ENV
   - Player
-  - 
-  - 
+  - Bullet
+  - Enemy
   - 
   - 
   - 
