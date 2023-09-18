@@ -32,8 +32,8 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    public LayerMask targetMask;  // 감지 대상 레이어 마스크
-    public LayerMask obstacleMask;// 장애물 레이어 마스크
+    public LayerMask targetMask;   // 감지 대상 레이어 마스크
+    public LayerMask obstacleMask; // 장애물 레이어 마스크
     
     public GameObject traceMark;
 
@@ -68,11 +68,8 @@ public class EnemyController : MonoBehaviour
                 case State.Move :
                     var randomPos = RandomNavmeshLocation(10f);
                     _myNavAgent.SetDestination(randomPos);
-                    
-                    Vector3 dir = (Vector3)randomPos - transform.position;
-                    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-                    _towardToAngle.Detect(Quaternion.Euler(0f, 0f, angle));
+                    RotateObj(randomPos);
+                    yield return new WaitForSeconds(1f);
                     break;
                 case State.Trace :
                     _myNavAgent.SetDestination(_target.position);
@@ -107,5 +104,12 @@ public class EnemyController : MonoBehaviour
         //     bool isCatchPlayer = hit.collider.gameObject.CompareTag("Player");
         //     CurrentState = isCatchPlayer ? State.Trace : State.Move;
         // }
+    }
+
+    private void RotateObj(Vector3 targetPos)
+    {
+        Vector3 dir = targetPos - transform.position;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        _towardToAngle.Detect(Quaternion.Euler(0f, 0f, angle));
     }
 }

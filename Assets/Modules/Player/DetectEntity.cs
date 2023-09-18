@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DetectEntity : MonoBehaviour
 {
-    private Shooter _shooter { get; set; }
+    private Attacker _shooter { get; set; }
     
     public float viewAngle = 90f; // 시야각도 (도)
     public float viewDistance = 20; // 시야 거리
@@ -26,14 +26,14 @@ public class DetectEntity : MonoBehaviour
     {
         while (ing)
         {
-            DetectEnemies();
+            DetectEntities();
             //OnDrawGizmosSelected();
             
             yield return new WaitForSeconds(0.1f);
         }
     }
 
-    void DetectEnemies()
+    void DetectEntities()
     {
         Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance, targetMask);
 
