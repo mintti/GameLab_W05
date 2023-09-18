@@ -37,10 +37,17 @@ public class EnemyController : MonoBehaviour
     
     public GameObject traceMark;
 
+    [Header("POV")]
+    private TowardToAngle _towardToAngle;
+    [SerializeField] private Transform _target;
+
+    
     private NavMeshAgent _myNavAgent;
     
     private void Start()
     {
+        _towardToAngle = GetComponentInChildren<TowardToAngle>();
+        
         _myNavAgent = GetComponent<NavMeshAgent>();
         _myNavAgent.updateUpAxis = false;
         _myNavAgent.updateRotation = false;
@@ -58,11 +65,17 @@ public class EnemyController : MonoBehaviour
             switch (CurrentState)
             {
                 case State.Idle : 
-                case State.Move : 
-                    _myNavAgent.SetDestination(RandomNavmeshLocation(10f));
+                case State.Move :
+                    var randomPos = RandomNavmeshLocation(10f);
+                    _myNavAgent.SetDestination(randomPos);
+                    
+                    Vector3 dir = (Vector3)randomPos - transform.position;
+                    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+                    _towardToAngle.Detect(Quaternion.Euler(0f, 0f, angle));
                     break;
                 case State.Trace :
-                    _myNavAgent.SetDestination(PlayerTr.position);
+                    _myNavAgent.SetDestination(_target.position);
                     break;
             }
             yield return null;
@@ -82,19 +95,17 @@ public class EnemyController : MonoBehaviour
 
     private void CheckPlayerInSight()
     {
-        Vector2 dir = PlayerTr.position - transform.position;
-        Vector2 trans = transform.position;
-        
-        var hit = Physics2D.Raycast(trans, dir.normalized, dir.magnitude, targetMask);
-
-
-        //var firstHit = hit.FirstOrDefault(x => !x.collider.CompareTag("Bullet"));
-        if (hit.collider != null)
-        {
-            bool isCatchPlayer = hit.collider.gameObject.CompareTag("Player");
-            CurrentState = isCatchPlayer ? State.Trace : State.Move;
-        }
+        // Vector2 dir = _target.position - transform.position;
+        // Vector2 trans = transform.position;
+        //
+        // var hit = Physics2D.Raycast(trans, dir.normalized, dir.magnitude, targetMask);
+        //
+        //
+        // //var firstHit = hit.FirstOrDefault(x => !x.collider.CompareTag("Bullet"));
+        // if (hit.collider != null)
+        // {
+        //     bool isCatchPlayer = hit.collider.gameObject.CompareTag("Player");
+        //     CurrentState = isCatchPlayer ? State.Trace : State.Move;
+        // }
     }
-
-    private Transform PlayerTr => GameManager.I.Player.transform;
 }

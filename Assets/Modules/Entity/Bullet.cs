@@ -33,8 +33,8 @@ public class Bullet : MonoBehaviour
     
     public void OnTriggerEnter2D(Collider2D col)
     {
-        if ((_targetPlayer && col.CompareTag("Enemy")) || 
-            (!_targetPlayer && col.CompareTag("Player")))
+        if ((_targetPlayer && col.CompareTag("Player")) || 
+            (!_targetPlayer && col.CompareTag("Enemy")))
         {
             col.GetComponent<State>().GetDamage(_damage);
             Destroy(gameObject);

@@ -8,7 +8,6 @@ using UnityEngine.InputSystem;
 public class GameManager : MonoBehaviour
 {
     public static GameManager I;
-    public GameObject Player { get; set; }
 
     private bool _isPause; 
     public bool IsPause {
@@ -32,13 +31,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnPause(InputAction.CallbackContext context)
+    // public void OnPause(InputAction.CallbackContext context)
+    // {
+    //     if (context.performed)
+    //     {
+    //         IsPause = !IsPause;
+    //     }
+    // }
+
+
+    private void Update()
     {
-        if (context.performed)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             IsPause = !IsPause;
         }
     }
-    
-    
 }

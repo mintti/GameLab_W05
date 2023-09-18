@@ -7,44 +7,30 @@ using UnityEngine.AI;
 using UnityEngine.InputSystem.Composites;
 using UnityEngine.Serialization;
 
-public enum PlayerState
-{
-    Idle,
-    Move
-}
 public class PlayerController : MonoBehaviour
 {
-    #region Player Info Property
-    public NavMeshAgent MyNavAgent { get; private set; }
-    public Vector3 Position => transform.position;
-    public Transform ArrowPivotTr;
+    [Header("Component")]
+    [SerializeField] private TowardToAngle _towardToAngle;
+    [SerializeField] private NavMeshAgent _myNavAgent;
 
-    #endregion
-
-    private PlayerState CurrentPlayerState { get; set; }
-
+    [Header("Infomation")]
     private Queue<PlayerCommand> _playerCmdQ = new();
     public bool IsAction { get; set; }
-    
-    public float viewAngle = 90f; // 시야각도 (도)
-    public float viewDistance = 20; // 시야 거리
-
-    public LayerMask targetMask ; // 감지 대상 레이어 마스크
-    public LayerMask obstacleMask;// 장애물 레이어 마스크
-    
-    private void Awake()
-    {
-        GameManager.I.Player = gameObject;
-    }
+    private bool _isAlive;
+    public Vector3 Position => transform.position;
 
     private void Start()
     {
-        MyNavAgent = GetComponent<NavMeshAgent>();
-        MyNavAgent.updateUpAxis = false;
-        MyNavAgent.updateRotation = false;
+        _towardToAngle = GetComponentInChildren<TowardToAngle>();
+        _towardToAngle.Detect(new Quaternion());
+        
+        _myNavAgent = GetComponent<NavMeshAgent>();
+        _myNavAgent.updateUpAxis = false;
+        _myNavAgent.updateRotation = false;
 
+        _isAlive = true;
         IsAction = false;
-        CurrentPlayerState = PlayerState.Idle;
+        
         StartCoroutine(nameof(ActiveState));
     }
 
@@ -62,50 +48,21 @@ public class PlayerController : MonoBehaviour
             if(_playerCmdQ .Count == 0) Debug.Log("Queue End!");
         }
     }
-
-    void AddAction(PlayerCommand cmd)
+    
+    public void AddMoveAction(Vector3 position, int idx, Action<int> callback)
     {
+        var cmd = new MoveCommand(this, position, idx, callback);
         _playerCmdQ.Enqueue(cmd);
     }
 
-    public void AddMoveAction(Vector3 position, int idx, Action<int> callback)
+    public void OrderMove(Vector3 dir)
     {
-        var cmd = new MoveCommand(this, PlayerState.Move, position, idx, callback);
-        AddAction(cmd);
+        _myNavAgent.SetDestination(dir);
     }
     
     public void ClearAction()
     {
         _playerCmdQ.Clear();
         IsAction = false;
-    }
-
-    public void TowardToAngle(Quaternion Angles)
-    {
-        var dir = Angles.normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x);
-        ArrowPivotTr.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f,0f, angle * Mathf.Rad2Deg - 90f), 5);
-    }
-    
-    void DetectEnemies()
-    {
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance, targetMask);
-
-        for (int i = 0; i < targetsInViewRadius.Length; i++)
-        {
-            Transform target = targetsInViewRadius[i].transform;
-            Vector2 dirToTarget = (target.position - transform.position).normalized;
-
-            if (Vector2.Angle(transform.up, dirToTarget) < viewAngle / 2)
-            {
-                float dstToTarget = Vector2.Distance(transform.position, target.position);
-
-                if (!Physics2D.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))
-                {
-                    Debug.Log("적 발견: " + target.name);
-                    // 여기에서 적을 처리하거나 원하는 작업을 수행하세요.
-                }
-            }
-        }
     }
 }

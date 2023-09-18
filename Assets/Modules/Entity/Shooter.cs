@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Shooter : MonoBehaviour
+public class Shooter : Attacker
 {
     public GameObject bulletPrefab;
     public Sprite bulletSprite;
@@ -12,20 +12,24 @@ public class Shooter : MonoBehaviour
 
     private bool _onShoot;
     public Transform _target;
+    
+    private DetectEntity _detectEntity;
 
     public void Start()
     {
-        _onShoot = true;
+        _onShoot = false;
+        _detectEntity = GetComponentInChildren<DetectEntity>();
+        _detectEntity.Init(this);
         StartCoroutine(ImShoot());
     }
     
-    public void StartShootMode(Transform target)
+    public override void StartAttack(Transform target)
     {
         _target = target;
         _onShoot = true;
     }
     
-    public void StopShootMode()
+    public override void StopAttack()
     {
         _onShoot = false;
     }
@@ -42,7 +46,7 @@ public class Shooter : MonoBehaviour
             var obj = Instantiate(bulletPrefab, transform.position, Quaternion.Euler(0, 0, rot));
             
             var bullet = obj.GetComponent<Bullet>();
-            bullet.Init(isPlayer, damage, bulletSprite);
+            bullet.Init(isTargetPlayer: !isPlayer, damage, bulletSprite);
             
             yield return new WaitForSeconds(shootInterval);
         }
