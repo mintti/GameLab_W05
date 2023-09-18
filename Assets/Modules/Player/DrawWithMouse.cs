@@ -84,8 +84,11 @@ public class DrawWithMouse : MonoBehaviour
         for (int i = 0, cnt = LineRenderer.positionCount; i < cnt; i++)
         {
             var pos = LineRenderer.GetPosition(i);
-            _list.Add(pos);
-            _controller.AddMoveAction(pos, i, End);
+            if (_controller.IsPositionOnNavMesh(pos))
+            {
+                _list.Add(pos);
+                _controller.AddMoveAction(pos, i, End);
+            }
         }
         SetEdgeCollider();
     }

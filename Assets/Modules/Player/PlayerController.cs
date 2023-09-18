@@ -65,4 +65,10 @@ public class PlayerController : MonoBehaviour
         _playerCmdQ.Clear();
         IsAction = false;
     }
+
+    public bool IsPositionOnNavMesh(Vector3 position)
+    {
+        NavMeshHit hit;
+        return NavMesh.SamplePosition(position, out hit, 0.1f, NavMesh.AllAreas);
+    }
 }
