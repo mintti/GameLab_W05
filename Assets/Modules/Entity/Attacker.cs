@@ -1,7 +1,22 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
-public abstract class Attacker : MonoBehaviour
+public class Attacker : AttackerBase
 {
-    public abstract void StartAttack(Transform target);
-    public abstract void StopAttack();
+    public int damage;
+    public override void StartAttack(Transform target)
+    {
+        StartCoroutine(Attack(target));
+    }
+
+    public override void StopAttack()
+    {
+        // nothing   
+    }
+
+    IEnumerator Attack(Transform target)
+    {
+        target.BroadcastMessage("GetDamage", damage);
+        yield return new WaitForSeconds(attackInterval);
+    }
 }

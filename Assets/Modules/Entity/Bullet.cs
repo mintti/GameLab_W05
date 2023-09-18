@@ -23,7 +23,8 @@ public class Bullet : MonoBehaviour
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _rigid = GetComponent<Rigidbody2D>();
         
-       // _spriteRenderer.sprite = sprite ?? _spriteRenderer.sprite;
+        if(sprite != null)
+            _spriteRenderer.sprite = sprite;
         _damage = damage;
         _targetPlayer = isTargetPlayer;   
         

@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DetectEntity : MonoBehaviour
 {
-    private Attacker _shooter { get; set; }
     
     public float viewAngle = 90f; // 시야각도 (도)
     public float viewDistance = 20; // 시야 거리
@@ -13,12 +14,12 @@ public class DetectEntity : MonoBehaviour
     public LayerMask obstacleMask;// 장애물 레이어 마스크
 
     public bool ing;
+    public Action<bool, Transform> DetectAction { get; set; }
     
     // Start is called before the first frame update
-    public void Init(Shooter shooter)
+    public void Init(Action<bool, Transform> detectAction)
     {
-        _shooter = shooter;
-        
+        DetectAction = detectAction;
         StartCoroutine(Detect());
     }
     
@@ -35,7 +36,7 @@ public class DetectEntity : MonoBehaviour
 
     void DetectEntities()
     {
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance, targetMask);
+        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance/2, targetMask);
 
         Transform closestTarget = null;
         float closestDistance = float.MaxValue;
@@ -45,12 +46,12 @@ public class DetectEntity : MonoBehaviour
             Transform target = targetsInViewRadius[i].transform;
             Vector2 dirToTarget = (target.position - transform.position).normalized;
 
-            if (Vector2.Angle(transform.up, dirToTarget) < viewAngle)
+            if (Vector2.Angle(transform.right, dirToTarget) < viewAngle/2)
             {
                 float dstToTarget = Vector2.Distance(transform.position, target.position);
 
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask);
- 
+                var hits = Physics2D.RaycastAll(transform.position, dirToTarget, dstToTarget, obstacleMask);
+                var hit = hits.Where(x => !x.collider.CompareTag("Bullet")).FirstOrDefault();
                 if (hit.collider == null && dstToTarget < closestDistance)
                 {
                     closestTarget = target;
@@ -61,12 +62,11 @@ public class DetectEntity : MonoBehaviour
 
         if (closestTarget != null)
         {
-            Debug.Log("가장 가까운 적 발견: " + closestTarget.name);
-            _shooter.StartAttack(closestTarget); // 가장 가까운 적을 타겟으로 설정
+            DetectAction?.Invoke(true, closestTarget);
         }
         else
         {
-            _shooter.StopAttack();
+            DetectAction?.Invoke(false, null);
         }
     }
     

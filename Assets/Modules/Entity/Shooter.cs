@@ -1,11 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public class Shooter : Attacker
+public class Shooter : AttackerBase
 {
     public GameObject bulletPrefab;
     public Sprite bulletSprite;
-    public float shootInterval;
 
     public bool isPlayer;
     public int damage;
@@ -18,9 +17,8 @@ public class Shooter : Attacker
     public void Start()
     {
         _onShoot = false;
-        _detectEntity = GetComponentInChildren<DetectEntity>();
-        _detectEntity.Init(this);
         StartCoroutine(ImShoot());
+        StopAttack();
     }
     
     public override void StartAttack(Transform target)
@@ -39,6 +37,7 @@ public class Shooter : Attacker
         while (true)
         {
             yield return new WaitUntil(() => _onShoot);
+            if (_target == null) continue;
             
             var dir = transform.position - _target.transform.position;
             var rot = Mathf.Atan2(-dir.y, -dir.x) * Mathf.Rad2Deg;
@@ -48,7 +47,7 @@ public class Shooter : Attacker
             var bullet = obj.GetComponent<Bullet>();
             bullet.Init(isTargetPlayer: !isPlayer, damage, bulletSprite);
             
-            yield return new WaitForSeconds(shootInterval);
+            yield return new WaitForSeconds(attackInterval);
         }
     }
 }

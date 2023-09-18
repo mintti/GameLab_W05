@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     [Header("Component")]
     [SerializeField] private TowardToAngle _towardToAngle;
     [SerializeField] private NavMeshAgent _myNavAgent;
+    [SerializeField] private DetectEntity _detectEntity;
+    [SerializeField] private AttackerBase _attacker;
+    [SerializeField] private Animator _animator;
 
     [Header("Infomation")]
     private Queue<PlayerCommand> _playerCmdQ = new();
@@ -21,8 +24,12 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        _animator = GetComponent<Animator>();
+        
         _towardToAngle = GetComponentInChildren<TowardToAngle>();
         _towardToAngle.Detect(new Quaternion());
+
+        _attacker = GetComponent<AttackerBase>();
         
         _myNavAgent = GetComponent<NavMeshAgent>();
         _myNavAgent.updateUpAxis = false;
@@ -32,6 +39,9 @@ public class PlayerController : MonoBehaviour
         IsAction = false;
         
         StartCoroutine(nameof(ActiveState));
+        
+        _detectEntity = GetComponentInChildren<DetectEntity>();
+        _detectEntity.Init(DetectEnemy);
     }
 
     IEnumerator ActiveState()
@@ -70,5 +80,28 @@ public class PlayerController : MonoBehaviour
     {
         NavMeshHit hit;
         return NavMesh.SamplePosition(position, out hit, 0.1f, NavMesh.AllAreas);
+    }
+
+    void DetectEnemy(bool isDetect, Transform target = null)
+    {
+        if(isDetect)
+        {
+            _attacker.StartAttack(target);
+        }
+        else
+        {
+            _attacker.StopAttack();
+        }
+    }
+
+    void Dead()
+    {
+        GameObject.Find("GameManager").GetComponent<GameManager>().DeadPlayer();
+        Destroy(gameObject);
+    }
+
+    void Hit()
+    {
+        _animator.Play("Hit");
     }
 }
