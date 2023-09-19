@@ -35,7 +35,7 @@ public class MoveCommand : PlayerCommand
     public override IEnumerator Execute()
     {       
         Controller.OrderMove(MovePosition);
-        while (!(Vector3.SqrMagnitude(new Vector2(Controller.Position.x, Controller.Position.y) - (Vector2)MovePosition) < 0.1))
+        while (!(Vector3.SqrMagnitude(new Vector2(Controller.Position.x, Controller.Position.y) - (Vector2)MovePosition) < 0.2))
         {   
             yield return new WaitForSeconds(0.1f);
         }

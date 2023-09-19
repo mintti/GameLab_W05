@@ -7,9 +7,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public Text playStopText;
     private bool _isPause; 
     public bool IsPause {
         get => _isPause;
@@ -17,11 +19,13 @@ public class GameManager : MonoBehaviour
         {
             _isPause = value;
             Time.timeScale = _isPause ? 1 : 0;
+            playStopText.text = _isPause ? "▶" : "■";
         }
     }
 
     private void Start()
     {
+        IsPause = false;
         monsterCountText.text = $"남은 적: {allMonsterCount}";
     }
 

@@ -36,7 +36,7 @@ public class DetectEntity : MonoBehaviour
 
     void DetectEntities()
     {
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance/2, targetMask);
+        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(transform.position, viewDistance, targetMask);
 
         Transform closestTarget = null;
         float closestDistance = float.MaxValue;
@@ -52,6 +52,7 @@ public class DetectEntity : MonoBehaviour
 
                 var hits = Physics2D.RaycastAll(transform.position, dirToTarget, dstToTarget, obstacleMask);
                 var hit = hits.Where(x => !x.collider.CompareTag("Bullet")).FirstOrDefault();
+                
                 if (hit.collider == null && dstToTarget < closestDistance)
                 {
                     closestTarget = target;
@@ -60,7 +61,7 @@ public class DetectEntity : MonoBehaviour
             }
         }
 
-        if (closestTarget != null)
+        if (closestTarget != null && !closestTarget.CompareTag("ENV"))
         {
             DetectAction?.Invoke(true, closestTarget);
         }
