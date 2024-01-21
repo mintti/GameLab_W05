@@ -781,9 +781,9 @@ MonoBehaviour:
   targetMask:
     serializedVersion: 2
     m_Bits: 512
-  obstacleMask:
+  hindranceMask:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 64
   ing: 1
 --- !u!1 &5690321843264463084
 GameObject:

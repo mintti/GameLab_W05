@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class DetectEntity : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class DetectEntity : MonoBehaviour
     public float viewDistance = 20; // 시야 거리
 
     public LayerMask targetMask ; // 감지 대상 레이어 마스크
-    public LayerMask obstacleMask;// 장애물 레이어 마스크
+    [FormerlySerializedAs("obstacleMask")] public LayerMask hindranceMask;// 장애물 레이어 마스크
 
     public bool ing;
     public Action<bool, Transform> DetectAction { get; set; }
@@ -46,13 +47,10 @@ public class DetectEntity : MonoBehaviour
             Transform target = targetsInViewRadius[i].transform;
             Vector2 dirToTarget = (target.position - transform.position).normalized;
 
-            if (Vector2.Angle(transform.right, dirToTarget) < viewAngle/2)
+            if (Vector2.Angle(transform.right, dirToTarget) < viewAngle / 2)
             {
                 float dstToTarget = Vector2.Distance(transform.position, target.position);
-
-                var hits = Physics2D.RaycastAll(transform.position, dirToTarget, dstToTarget, obstacleMask);
-                var hit = hits.Where(x => !x.collider.CompareTag("Bullet")).FirstOrDefault();
-                
+                var hit = Physics2D.RaycastAll(transform.position, dirToTarget, dstToTarget, hindranceMask).FirstOrDefault();
                 if (hit.collider == null && dstToTarget < closestDistance)
                 {
                     closestTarget = target;
